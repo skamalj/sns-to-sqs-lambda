@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  SNSTopicArnSecret:
+    Type: String
+    Default: "ses-to-sns-agent-topic"
+    Description: Secret name for SNS topic ARN
+
+  SQSQueueNameSecret:
+    Type: String
+    Default:  "unified-queue"
+    Description: Secret name for SQS queue name
+
+Resources:
+  ProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          SQS_QUEUE_URL: !Sub "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/{{resolve:secretsmanager:${SQSQueueNameSecret}}}"
+      Events:
+        ProcessingEvent:
+          Type: SNS
+          Properties:
+            Topic: !Sub "{{resolve:secretsmanager:${SNSTopicArnSecret}}}"
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !Sub "{{resolve:secretsmanager:${SQSQueueNameSecret}}}"
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*"
+
+Outputs:
+  ProcessorFunctionArn:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt ProcessorFunction.Arn
