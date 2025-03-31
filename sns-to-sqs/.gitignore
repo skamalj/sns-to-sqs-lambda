@@ -12,7 +12,6 @@ ENV/
 
 # AWS SAM
 .aws-sam/
-samconfig.toml
 
 # IDE
 .idea/
