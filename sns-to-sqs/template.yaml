@@ -18,9 +18,9 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: app.lambda_handler
-      Runtime: python3.12
+      Runtime: python3.10
       Architectures:
-        - arm64
+        - x86_64
       Environment:
         Variables:
           SQS_QUEUE_URL: !Sub "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/{{resolve:secretsmanager:${SQSQueueNameSecret}}}"
