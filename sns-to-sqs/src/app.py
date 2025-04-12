@@ -18,6 +18,7 @@ def lambda_handler(event, context):
 
     # Get raw MIME content (encoded as UTF-8)
     raw_email = ses_notification["content"].encode('utf-8')
+    print(raw_email)
 
     # Parse MIME content
     mime_message = BytesParser(policy=policy.default).parsebytes(raw_email)
